@@ -14,6 +14,7 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/pkg/errors"
+	"github.com/rancher/pipeline/notification"
 	"github.com/rancher/pipeline/pipeline"
 	"github.com/rancher/pipeline/restfulserver"
 	"github.com/sluu99/uuid"
@@ -558,7 +559,7 @@ func (j *JenkinsProvider) SyncActivity(activity *pipeline.Activity) (bool, error
 			updated = true
 			logrus.Infof("sync activity %v,updated !", activity.Id)
 		}
-		logrus.Infof("after sync,beforestatus and after:%v,%v", beforeStatus, actiStage.Status)
+		//logrus.Infof("after sync,beforestatus and after:%v,%v", beforeStatus, actiStage.Status)
 	}
 
 	return updated, nil
@@ -578,6 +579,13 @@ func (j *JenkinsProvider) OnActivityCompelte(activity *pipeline.Activity) {
 	res, err := ExecScript(cleanServiceScript)
 	logrus.Infof("clean services result:%v,%v", res, err)
 
+	//send notification
+	if activity.Pipeline.IsEmail {
+		if err := sendEmail(activity); err != nil {
+			logrus.Errorf("Send Notification Email Error:%v", err)
+		}
+
+	}
 	//clean workspace
 	// command = "rm -rf ${System.getenv('JENKINS_HOME')}/workspace/" + activity.Id
 	// cleanWorkspaceScript := fmt.Sprintf(ScriptSkel, activity.NodeName, strings.Replace(command, "\"", "\\\"", -1))
@@ -585,6 +593,43 @@ func (j *JenkinsProvider) OnActivityCompelte(activity *pipeline.Activity) {
 	// logrus.Infof("clean workspace result:%v,%v", res, err)
 
 }
+
+func sendEmail(activity *pipeline.Activity) error {
+	setting, err := restfulserver.GetPipelineSetting()
+	if err != nil {
+		return err
+	}
+
+	notifier := notification.NewEmailNotifier(setting.SMTPHost, setting.SMTPPort, setting.SMTPUsername, setting.SMTPPassword)
+	stringbuilder := new(bytes.Buffer)
+	stringbuilder.WriteString(activity.PipelineName)
+	stringbuilder.WriteString(" - Execution #")
+	stringbuilder.WriteString(strconv.Itoa(activity.RunSequence))
+	stringbuilder.WriteString(" - ")
+	stringbuilder.WriteString(activity.Status)
+	stringbuilder.WriteString("!")
+
+	subject := stringbuilder.String()
+	tm := time.Unix(activity.StartTS, 0)
+	tm.Format("2006-01-02 03:04:05 PM")
+	stringbuilder.WriteString("\nStart time: ")
+	stringbuilder.WriteString(tm.Format("2006-01-02 03:04:05 PM"))
+	stringbuilder.WriteString("\nExecution time: ")
+	duration := (activity.StopTS - activity.StartTS) / 1000
+	stringbuilder.WriteString(strconv.Itoa(int(duration)))
+	stringbuilder.WriteString("s\n")
+	stringbuilder.WriteString("Status:\n")
+	for _, stage := range activity.ActivityStages {
+		stringbuilder.WriteString(stage.Name)
+		stringbuilder.WriteString(": ")
+		stringbuilder.WriteString(stage.Status)
+		stringbuilder.WriteString("\n")
+	}
+	body := stringbuilder.String()
+
+	return notifier.SendMail(activity.Pipeline.EmailRecipients, subject, body)
+}
+
 func (j *JenkinsProvider) GetStepLog(activity *pipeline.Activity, stageOrdinal int, stepOrdinal int) (string, error) {
 	p := activity.Pipeline
 	if stageOrdinal < 0 || stageOrdinal > len(activity.ActivityStages) || stepOrdinal < 0 || stepOrdinal > len(activity.ActivityStages[stageOrdinal].ActivitySteps) {
@@ -691,7 +736,7 @@ func parseSteps(actiStage *pipeline.ActivityStage, rawOutput string) bool {
 }
 
 func parseStepTime(step *pipeline.ActivityStep, log string, activityStartTS int64) {
-	logrus.Infof("parsesteptime")
+	//logrus.Infof("parsesteptime")
 	token := "(^|\\n)\\w{14}  "
 	r, _ := regexp.Compile(token)
 	lines := r.FindAllString(log, -1)

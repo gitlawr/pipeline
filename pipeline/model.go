@@ -44,7 +44,11 @@ var PreservedEnvs = [...]string{"CICD_GIT_COMMIT", "CICD_GIT_PREVIOUS_COMMIT", "
 
 type PipelineSetting struct {
 	client.Resource
-	HostUrl string `json:"hostUrl,omitempty" yaml:"hostUrl,omitempty"`
+	HostUrl      string `json:"hostUrl,omitempty" yaml:"hostUrl,omitempty"`
+	SMTPHost     string `json:"SMTPHost,omitempty" yaml:"SMTPHost,omitempty"`
+	SMTPPort     int    `json:"SMTPPort,omitempty" yaml:"SMTPPort,omitempty"`
+	SMTPUsername string `json:"SMTPUsername,omitempty" yaml:"SMTPUsername,omitempty"`
+	SMTPPassword string `json:"SMTPPassword,omitempty" yaml:"SMTPPassword,omitempty"`
 }
 
 type Pipeline struct {
@@ -69,6 +73,11 @@ type Pipeline struct {
 	TriggerOnUpdate bool   `json:"triggerOnUpdate,omitempty" yaml:"triggerOnUpdate,omitempty"`
 	TriggerSpec     string `json:"triggerSpec" yaml:"triggerSpec,omitempty"`
 	TriggerTimezone string `json:"triggerTimezone,omitempty" yaml:"triggerTimezone,omitempty"`
+
+	//email notification settings
+	IsEmail         bool   `json:"isEmail,omitempty" yaml:"isEmail,omitempty"`
+	IsSendCommitter bool   `json:"isSendCommitter,omitempty" yaml:"isSendCommitter,omitempty"`
+	EmailRecipients string `json:"emailRecipients,omitempty" yaml:"emailRecipients,omitempty"`
 
 	Stages []*Stage `json:"stages,omitempty" yaml:"stages,omitempty"`
 }
