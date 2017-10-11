@@ -87,6 +87,7 @@ func NewRouter(s *Server) *mux.Router {
 		"activate":   f(schemas, s.ActivatePipeline),
 		"deactivate": f(schemas, s.DeActivatePipeline),
 		"remove":     f(schemas, s.DeletePipeline),
+		"export":     f(schemas, s.ExportPipeline),
 	}
 	for name, actions := range pipelineActions {
 		router.Methods(http.MethodPost).Path("/v1/pipelines/{id}").Queries("action", name).Handler(actions)
