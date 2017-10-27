@@ -61,6 +61,9 @@ func (c *ConnHolder) DoWrite(apiContext *api.ApiContext, uid string) {
 			}
 			activity, ok := message.Data.(pipeline.Activity)
 			if ok {
+				if !validAccountAccessById(uid, activity.Pipeline.Stages[0].Steps[0].GitUser) {
+					continue
+				}
 				toActivityResource(apiContext, &activity)
 				if canApprove(uid, &activity) {
 					//add approve action
@@ -68,6 +71,13 @@ func (c *ConnHolder) DoWrite(apiContext *api.ApiContext, uid string) {
 					activity.Actions["deny"] = apiContext.UrlBuilder.ReferenceLink(activity.Resource) + "?action=deny"
 				}
 				message.Data = activity
+			}
+			pipeline, ok := message.Data.(*pipeline.Pipeline)
+			if ok {
+				if !validAccountAccessById(uid, pipeline.Stages[0].Steps[0].GitUser) {
+					continue
+				}
+				message.Data = pipeline
 			}
 			b, err := json.Marshal(message)
 			if err != nil {
