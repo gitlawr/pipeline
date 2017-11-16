@@ -20,7 +20,7 @@ var (
 	CIWebhookEndpoint = ""
 )
 
-const CIWEBHOOKTYPE = "serviceWebhook"
+const CIWEBHOOKTYPE = "forwardPost"
 const CIWEBHOOKNAME = "CIEndpoint"
 
 type WebhookGenericObject struct {
@@ -71,6 +71,7 @@ func CreateCIEndpointWebhook() error {
 		Driver: CIWEBHOOKTYPE,
 		Name:   CIWEBHOOKNAME,
 		Config: map[string]string{
+			"projectId":   projectId,
 			"serviceName": "pipeline-server",
 			"port":        "60081",
 			"path":        "/v1/webhook",
