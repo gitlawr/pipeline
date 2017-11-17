@@ -7,8 +7,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/rancher/pipeline/config"
 	"github.com/rancher/pipeline/jenkins"
-	"github.com/rancher/pipeline/pipeline"
-	"github.com/rancher/pipeline/restfulserver"
+	"github.com/rancher/pipeline/server"
 	"github.com/urfave/cli"
 )
 
@@ -70,15 +69,10 @@ func checkAndRun(c *cli.Context) (rtnerr error) {
 	}
 	config.Parse(c)
 	jenkins.InitJenkins()
-	pipelineContext := pipeline.BuildPipelineContext(&jenkins.JenkinsProvider{})
+	provider := jenkins.JenkinsProvider{}
 	errChan := make(chan bool)
-	restfulserver.Preset(pipelineContext)
-	go restfulserver.ListenAndServe(pipelineContext, errChan)
-	go restfulserver.ListenAndServeExternal(pipelineContext, errChan)
+	go server.ListenAndServe(provider, errChan)
 
-	server := restfulserver.NewServer(pipelineContext)
-
-	restfulserver.InitAgent(server)
 	<-errChan
 	logrus.Info("Going down")
 	return nil
