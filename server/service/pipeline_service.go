@@ -175,23 +175,25 @@ func RunPipeline(provider model.PipelineProvider, id string, triggerType string)
 	return activity, nil
 }
 
+func UpdatePipelineEnvKey(p *model.Pipeline) error {
+	for _, stage := range p.Stages {
+		for _, step := range stage.Steps {
+			if step.Accesskey != "" && step.Secretkey != "" {
+				if err := CreateOrUpdateEnvKey(step.Accesskey, step.Secretkey); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func HasStepCondition(s *model.Step) bool {
 	return s.Conditions != nil && (len(s.Conditions.All) > 0 || len(s.Conditions.Any) > 0)
 }
 
 func HasStageCondition(s *model.Stage) bool {
 	return s.Conditions != nil && (len(s.Conditions.All) > 0 || len(s.Conditions.Any) > 0)
-}
-
-func FilerToken(pipeline *model.Pipeline) {
-	pipeline.WebHookToken = ""
-	for _, stage := range pipeline.Stages {
-		for _, step := range stage.Steps {
-			if step.Secretkey != "" {
-				step.Secretkey = "******"
-			}
-		}
-	}
 }
 
 func GetNextRunTime(pipeline *model.Pipeline) int64 {

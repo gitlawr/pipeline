@@ -306,12 +306,55 @@ func CreateOrUpdateCacheRepoList(accountId string, repos []*model.GitRepository)
 	return err
 }
 
+func CreateOrUpdateEnvKey(clientId string, token string) error {
+	id := "envKey:" + clientId
+	apiClient, err := util.GetRancherClient()
+	if err != nil {
+		return err
+	}
+	filters := make(map[string]interface{})
+	filters["kind"] = GIT_ACCOUNT_TYPE
+	filters["key"] = id
+	goCollection, err := apiClient.GenericObject.List(&client.ListOpts{
+		Filters: filters,
+	})
+	if err != nil {
+		return fmt.Errorf("Error %v filtering genericObjects by key", err)
+	}
+	account := &model.GitAccount{
+		AccountType: "envKey",
+		Login:       clientId,
+		AccessToken: token,
+	}
+	if len(goCollection.Data) == 0 {
+		//not exist, create new
+		if err := CreateAccount(account); err != nil {
+			return err
+		}
+	} else {
+		//update
+		if err := UpdateAccount(account); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func ValidAccountAccess(req *http.Request, accountId string) bool {
 	return true
 }
 
 func ValidAccountAccessById(uid string, accountId string) bool {
 	return true
+}
+
+func GetEnvToken(EnvId string) (string, error) {
+	id := "envKey:" + EnvId
+	account, err := GetAccount(id)
+	if err != nil {
+		return "", err
+	}
+	return account.AccessToken, nil
 }
 
 func GetUserToken(gitUser string) (string, error) {
