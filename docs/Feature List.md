@@ -14,18 +14,18 @@ Pipeline:
 | run pipeline                             |      |
 | user-define parameter                    |      |
 | pre-define environment variables         |      |
-| environment variable sustitution in pipeline configuration |      |
+| environment variable substitution in pipeline configuration |      |
 | dragable stage/step on UI                |      |
 | setting cron trigger for pipeline        |      |
 
-Activity:
+History:
 
 | FEATURE                                  | DESC |
 | ---------------------------------------- | ---- |
-| get activity list                        |      |
-| rerun activity                           |      |
-| stop activity                            |      |
-| deny/approve `pending` activity          |      |
+| get history list                        |      |
+| rerun history                           |      |
+| stop history                            |      |
+| deny/approve `pending` history          |      |
 | get detail status of each stage and step |      |
 | get log of a step                        |      |
 
@@ -33,10 +33,10 @@ Authorization:
 
 | FEATURE                                  | DESC |
 | ---------------------------------------- | ---- |
-| Github Oauth for authorization           |      |
-| Add/delete auth user                     |      |
+| GitHub/GitLab Oauth for authorization           |      |
+| Add/delete Oauth user                     |      |
 | disable/reconfig github oauth application |      |
-| share/unshare git account(Private by default) |      |
+
 
 Stage:
 
@@ -50,12 +50,14 @@ Step:
 
 | FEATURE                                  | DESC |
 | ---------------------------------------- | ---- |
-| scm - choose a git repo and branch       |      |
+| set conditions           |      |
+| set timeout |      |
+| scm - choose a git account, repo, branch       |      |
 | scm - enable/disable github webhook      |      |
 | task - run shell script                  |      |
 | task - run custom entrypoint and commands |      |
 | task - run as a service and be referenced by following steps |      |
-| task - can pass  Environment Variables   |      |
+| task - can pass Environment Variables   |      |
 | task - can use passed Environment Variables in shell script |      |
 | build - build with Dockerfile in source code |      |
 | build - build with uploaded Dockerfile   |      |
@@ -68,3 +70,11 @@ Step:
 | upgradeCatalog - upgrade a catalog with template files |      |
 | upgradeCatalog - upgrade a stack to newly updated catalog item version |      |
 | upgradeCatalog - target other environment when upgrade a stack |      |
+
+
+
+Setting:
+
+| FEATURE                                  | DESC |
+| ---------------------------------------- | ---- |
+| Reset Application           |  Delete all pipeline-related data    |
